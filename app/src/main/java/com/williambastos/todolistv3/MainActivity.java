@@ -5,21 +5,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,13 +22,13 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BottomNewTask.OnInputListener {
 
-    private static final String TAG = "todolist";
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager lm;
     private ArrayList<Task> tasks = new ArrayList<>();
+    public Task t;
     public static String BASE_URL = "https://jsonplaceholder.typicode.com/";
     private static Retrofit retrofit = null;
 
@@ -63,6 +58,17 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
+    @Override
+    public void sendInput(Task newTask) {
+        tasks.add(0,newTask);
+        refresh();
+    }
+
+    private void refresh() {
+        adapter = new TaskAdapter(tasks);
+        recyclerView.setAdapter(adapter);
+    }
+
     public void APIClient(){
         if (retrofit == null){
             retrofit = new Retrofit.Builder()
@@ -78,8 +84,8 @@ public class MainActivity extends AppCompatActivity {
                     tasks.clear();
                     tasks = response.body();
                     fill(tasks);
-                    adapter = new TaskAdapter(tasks);
-                    recyclerView.setAdapter(adapter);
+                    Collections.reverse(tasks);
+                    refresh();
                 }
             }
 
@@ -100,13 +106,5 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        SharedPreferences pref = getSharedPreferences("json", Context.MODE_PRIVATE);
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        String json_s = gson.toJson(tasks);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.remove("json_s");
-        editor.putString("json_s",json_s);
-        editor.apply();
     }
 }

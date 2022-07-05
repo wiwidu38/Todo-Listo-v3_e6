@@ -1,6 +1,7 @@
 package com.williambastos.todolistv3;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -19,8 +20,7 @@ public class BottomNewTask extends BottomSheetDialogFragment {
     public static final String TAG = "todolist";
     private EditText editTextAdd;
     private Button buttonAdd;
-
-
+    public OnInputListener mOnInputListener;
 
     public static BottomNewTask newInstance(){
         return new BottomNewTask();
@@ -45,6 +45,7 @@ public class BottomNewTask extends BottomSheetDialogFragment {
                     Toast.makeText(view.getContext(),"Your task name is empty, retry !", Toast.LENGTH_SHORT).show();
                 }else{
                     Task item = new Task(taskName);
+                    mOnInputListener.sendInput(item);
                     dismiss();
                 }
             }
@@ -55,5 +56,15 @@ public class BottomNewTask extends BottomSheetDialogFragment {
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
         super.onDismiss(dialog);
+    }
+
+    public interface OnInputListener {
+        void sendInput(Task newTask);
+    }
+
+    @Override public void onAttach(Context context)
+    {
+        super.onAttach(context);
+        mOnInputListener = (OnInputListener)getActivity();
     }
 }
